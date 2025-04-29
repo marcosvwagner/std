@@ -3,10 +3,7 @@
  */
 package engtelecom.std;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.net.Socket;
 import java.util.Scanner;
 
@@ -15,40 +12,46 @@ public class App {
 
     public static void main(String[] args) {
 
-        String servidor = args[0];
-//        String servidor = "LocalHost";
-//        int porta = 1234;
+        String servidor = "LocalHost";
+        int porta = 1234;
 
-
-        int porta = Integer.parseInt(args[1]);
+//        String servidor = args[0];
+//        int porta = Integer.parseInt(args[1]);
 
         try(Socket socket = new Socket(servidor, porta)){
 
             System.out.println("Conectado no servidor...");
 
-            //Fluxos de I/O
-            BufferedReader entrada = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-            OutputStreamWriter saida = new OutputStreamWriter(socket.getOutputStream(), "UTF-8");
 
             Scanner sc = new Scanner(System.in);
+            System.out.print("Nome do arquivo>");
+            String nomeArquivo = sc.nextLine();
 
 
-            while (true) {
+            // DataInputStream
+            DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
+            DataInputStream dis = new DataInputStream(socket.getInputStream());
+            dos.writeUTF(nomeArquivo);
 
-                System.out.print(">");
-                String mensagem = sc.nextLine();
-                saida.write(mensagem + "\n");
-                saida.flush();
+            long tamanhoArquivo = dis.readLong();
 
-                if (mensagem.equals("fim")){
-                    break;
-                }
-                String resposta = entrada.readLine();
+            FileOutputStream fos = new FileOutputStream(nomeArquivo);
+            byte[] buffer = new byte[4096];
+            long total = 0;
+            int bytesLidos;
 
-                System.out.println("resposta: " + resposta);
+            while (total < tamanhoArquivo && (bytesLidos = dis.read(buffer, 0, (int)Math.min(buffer.length,
+                    tamanhoArquivo - total))) != -1) {
 
+                fos.write(buffer, 0, bytesLidos);
+
+                total += bytesLidos;
+                System.out.println("bites lidos: " +  total);
             }
+
+            fos.close();
+            dis.close();
 
         } catch (Exception e) {
             System.out.println("Erro: "+e.toString());
