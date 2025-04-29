@@ -16,6 +16,8 @@ public class App {
     public static void main(String[] args) {
 
         String servidor = args[0];
+//        String servidor = "LocalHost";
+//        int porta = 1234;
 
 
         int porta = Integer.parseInt(args[1]);
@@ -32,14 +34,21 @@ public class App {
             Scanner sc = new Scanner(System.in);
 
 
-            System.out.printf(">");
-            String mensagem = sc.nextLine();
-            saida.write(mensagem+"\n");
-            saida.flush();
+            while (true) {
 
-            String resposta = entrada.readLine();
+                System.out.print(">");
+                String mensagem = sc.nextLine();
+                saida.write(mensagem + "\n");
+                saida.flush();
 
-            System.out.println("resposta: "+resposta);
+                if (mensagem.equals("fim")){
+                    break;
+                }
+                String resposta = entrada.readLine();
+
+                System.out.println("resposta: " + resposta);
+
+            }
 
         } catch (Exception e) {
             System.out.println("Erro: "+e.toString());
